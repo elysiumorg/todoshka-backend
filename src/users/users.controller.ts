@@ -8,8 +8,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators';
+import { RefType } from 'mongoose';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { NullInterceptor } from 'src/shared/interceptors/null-interceptor';
+import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
 import { ValidationPipe } from 'src/shared/pipes/validataion.pipe';
 import { Role } from '../auth/enums/role.enum';
 import { AccessTokenGuard } from '../auth/guards/acces-token.guard';
@@ -20,7 +23,10 @@ import { UserByIdPipe } from './pipes/user-by-id.pipe';
 import { User, UserDocument } from './user.schema';
 import { UsersService } from './users.service';
 
-@UseInterceptors(MongooseClassSerializerInterceptor(User))
+@UseInterceptors(
+  new NullInterceptor('User'),
+  MongooseClassSerializerInterceptor(User),
+)
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
@@ -47,25 +53,25 @@ export class UsersController {
   @Patch('/me')
   updateMe(
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
-    @CurrentUser() user: UserDocument,
+    @CurrentUser() id: RefType,
   ) {
-    return this.usersService.update(user, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Patch(':id')
   update(
-    @Param('id', UserByIdPipe) user: UserDocument,
+    @Param('id', UserByIdPipe) id: RefType,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.update(user, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Delete(':id')
-  remove(@Param('id', UserByIdPipe) user: UserDocument) {
-    return this.usersService.remove(user);
+  remove(@Param('id', ParseObjectIdPipe) id: RefType) {
+    return this.usersService.remove(id);
   }
 }

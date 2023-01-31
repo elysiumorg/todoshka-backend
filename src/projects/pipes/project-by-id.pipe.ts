@@ -19,11 +19,9 @@ export class ProjectByIdPipe
   async transform(value: string, metadata: ArgumentMetadata) {
     super.transform(value, metadata);
     const project = await this.projectService.findById(value);
-
     if (!project) {
       throw new NotFoundException('Project not found');
     }
-
     return project;
   }
 }

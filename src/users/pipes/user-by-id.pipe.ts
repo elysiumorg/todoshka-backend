@@ -1,4 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common/exceptions';
 import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
 import { UsersService } from '../users.service';
 
@@ -13,6 +14,10 @@ export class UserByIdPipe
 
   async transform(value: string, metadata: ArgumentMetadata) {
     super.transform(value, metadata);
-    return await this.usersService.findById(value);
+    const user = await this.usersService.findById(value);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }

@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, RefType } from 'mongoose';
+import { User, UserDocument } from 'src/users/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -30,26 +35,42 @@ export class ProjectsService {
       .populate({ path: 'users.user', model: 'User' });
   }
 
-  async removeUserFromProject(project: ProjectDocument, user) {
-    project.removeUser(user);
-    return this.findById(project.id);
+  addUserToProject(project: ProjectDocument, user: UserDocument) {
+    if (project.users.some((el) => el.user._id == user.id)) {
+      throw new BadRequestException('User is already exists');
+    }
+    return this.projectModel.findOneAndUpdate(
+      { id: project.id, 'users.user': { $not: { $eq: user } } },
+      {
+        $push: {
+          users: { user: user.id, rights: [] },
+        },
+      },
+      { new: true },
+    );
   }
 
-  async updateUserRights(
-    project: ProjectDocument,
-    user: string,
-    rights: Rights[],
-  ) {
-    await this.userService.findById(user);
-    await project.addUser(user);
-    await project.updateOne(
+  removeUserFromProject(id: RefType, user: UserDocument) {
+    return this.projectModel.findOneAndUpdate(
+      { id },
+      {
+        $pull: {
+          users: { user: user.id },
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async updateUserRights(id: RefType, user: User, rights: Rights[]) {
+    return this.projectModel.findOneAndUpdate(
+      { id, users: { user: user._id } },
       {
         $set: {
           'users.$[element].rights': rights,
         },
       },
-      { arrayFilters: [{ 'element.user': user }] },
+      { arrayFilters: [{ 'element.user': user._id }], new: true },
     );
-    return this.findById(project.id);
   }
 }

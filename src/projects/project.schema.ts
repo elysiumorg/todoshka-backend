@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import { Transform } from 'class-transformer';
 import mongoose, { Document } from 'mongoose';
-import { User } from 'src/users/user.schema';
+import { User, UserDocument } from 'src/users/user.schema';
 import { Rights } from './enums/rights.enum';
 
 export type ProjectDocument = Project & Document;
@@ -36,27 +36,6 @@ export class Project {
   users: Array<{ user: User; rights: number }>;
   @Prop({ default: Date.now() })
   createdDate: Date;
-
-  addUser: (user) => Promise<void>;
-  removeUser: (user) => Promise<void>;
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
-
-ProjectSchema.methods.addUser = async function (user) {
-  if (!this.users.some((proj) => (proj.user._id = user))) {
-    await this.updateOne({
-      $push: {
-        users: { user, rights: [] },
-      },
-    });
-  }
-};
-
-ProjectSchema.methods.removeUser = async function (user) {
-  await this.updateOne({
-    $pull: {
-      users: { user },
-    },
-  });
-};
