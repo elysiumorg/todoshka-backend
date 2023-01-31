@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude, Type } from 'class-transformer';
-import { Transform } from 'class-transformer';
+import { Exclude, Transform, Type } from 'class-transformer';
 import mongoose, { Document } from 'mongoose';
-import { User, UserDocument } from 'src/users/user.schema';
+import { User } from 'src/users/user.schema';
 import { Rights } from './enums/rights.enum';
 
 export type ProjectDocument = Project & Document;

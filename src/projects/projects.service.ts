@@ -1,14 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common/exceptions';
+import { BadRequestException } from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, RefType } from 'mongoose';
 import { User, UserDocument } from 'src/users/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { Rights } from './enums/rights.enum';
 import { Project, ProjectDocument } from './project.schema';
 
