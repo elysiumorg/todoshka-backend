@@ -1,38 +1,31 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude, Transform, Type } from 'class-transformer';
-import mongoose, { Document } from 'mongoose';
-import { User } from 'src/users/user.schema';
-import { Rights } from './enums/rights.enum';
+import { Exclude, Type } from 'class-transformer';
+import { Document, ObjectId } from 'mongoose';
+import {
+  UserRights,
+  UserRightsSchema,
+} from 'src/shared/schemas/user-rights.schema';
 
 export type ProjectDocument = Project & Document;
 
-class UserRights {
-  @Type(() => User)
-  user: User;
-  rights: Rights[];
-}
-
-@Schema()
+@Schema({
+  toJSON: {
+    virtuals: true,
+  },
+})
 export class Project {
-  @Transform(({ obj }) => obj._id.toString())
-  _id: string;
+  @Exclude()
+  _id: ObjectId;
   @Exclude()
   __v: number;
   @Prop({ required: true })
   title: string;
   @Type(() => UserRights)
   @Prop({
-    user: {
-      type: [
-        {
-          user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-          rights: { type: Array<Rights>, default: [] },
-        },
-      ],
-    },
+    type: [UserRightsSchema],
     default: [],
   })
-  users: Array<{ user: User; rights: number }>;
+  users: UserRights[];
   @Prop({ default: Date.now() })
   createdDate: Date;
 }

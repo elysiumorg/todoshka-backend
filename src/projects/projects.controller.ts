@@ -17,6 +17,7 @@ import { UserByIdPipe } from 'src/users/pipes/user-by-id.pipe';
 import { UserDocument } from 'src/users/user.schema';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { Rights } from './enums/rights.enum';
+import { ParseRightsPipe } from './pipes/parse-rights.pipe';
 import { ProjectByIdPipe } from './pipes/project-by-id.pipe';
 import { Project, ProjectDocument } from './project.schema';
 import { ProjectsService } from './projects.service';
@@ -48,7 +49,7 @@ export class ProjectsController {
   updateUserRights(
     @Param('id', ParseObjectIdPipe) id: RefType,
     @Body('userId', UserByIdPipe) user: UserDocument,
-    @Body('rights') rights: Rights[],
+    @Body('rights', ParseRightsPipe) rights: Rights[] = [],
   ) {
     return this.projectsService.updateUserRights(id, user, rights);
   }
@@ -57,8 +58,9 @@ export class ProjectsController {
   addUserToProject(
     @Param('id', ProjectByIdPipe) project: ProjectDocument,
     @Body('userId', UserByIdPipe) user: UserDocument,
+    @Body('rights', ParseRightsPipe) rights: Rights[] = [],
   ) {
-    return this.projectsService.addUserToProject(project, user);
+    return this.projectsService.addUserToProject(project, user, rights);
   }
 
   @Delete(':id/users')

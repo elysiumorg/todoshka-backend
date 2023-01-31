@@ -18,11 +18,11 @@ export class UsersService {
   }
 
   async findById(id: RefType): Promise<UserDocument> {
-    return await this.userModel.findById(id);
+    return await this.userModel.findById(id).populate('projects');
   }
 
   async findByEmail(email: string): Promise<UserDocument> {
-    return this.userModel.findOne({ email });
+    return this.userModel.findOne({ email }).populate('projects');
   }
 
   async update(id: RefType, update: UpdateUserDto): Promise<UserDocument> {

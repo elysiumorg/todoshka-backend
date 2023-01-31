@@ -20,53 +20,67 @@ export class ProjectsService {
   }
 
   findAll() {
-    return this.projectModel
-      .find({})
-      .populate({ path: 'users.user', model: 'User' });
+    return this.projectModel.find({}).populate({ path: 'users.user' });
   }
 
   findById(id: RefType) {
-    return this.projectModel
-      .findById(id)
-      .populate({ path: 'users.user', model: 'User' });
+    return this.projectModel.findById(id).populate({ path: 'users.user' });
   }
 
-  addUserToProject(project: ProjectDocument, user: UserDocument) {
-    if (project.users.some((el) => el.user._id == user.id)) {
+  addUserToProject(
+    project: ProjectDocument,
+    user: UserDocument,
+    rights: Rights[],
+  ) {
+    if (project.users.some((el) => el.user.id == user.id)) {
       throw new BadRequestException('User is already exists');
     }
-    return this.projectModel.findOneAndUpdate(
-      { id: project.id, 'users.user': { $not: { $eq: user } } },
-      {
-        $push: {
-          users: { user: user.id, rights: [] },
+    return this.projectModel
+      .findOneAndUpdate(
+        { id: project.id, 'users.user': { $not: { $eq: user } } },
+        {
+          $push: {
+            users: { user: user.id, rights },
+          },
         },
-      },
-      { new: true },
-    );
+        { new: true, runValidators: true },
+      )
+      .populate('users.user');
   }
 
   removeUserFromProject(id: RefType, user: UserDocument) {
-    return this.projectModel.findOneAndUpdate(
-      { id },
-      {
-        $pull: {
-          users: { user: user.id },
+    return this.projectModel
+      .findOneAndUpdate(
+        { id },
+        {
+          $pull: {
+            users: { user: user.id },
+          },
         },
-      },
-      { new: true },
-    );
+        { new: true },
+      )
+      .populate('users.user');
   }
 
   async updateUserRights(id: RefType, user: User, rights: Rights[]) {
-    return this.projectModel.findOneAndUpdate(
-      { id, users: { user: user._id } },
-      {
-        $set: {
-          'users.$[element].rights': rights,
+    if (
+      !(await this.projectModel.findOne({
+        id,
+        'users.user': { $eq: user },
+      }))
+    ) {
+      throw new BadRequestException("User doesn't exist in this project");
+    }
+    return this.projectModel
+      .findOneAndUpdate(
+        { id },
+        {
+          $set: {
+            'users.$[element].rights': rights,
+          },
         },
-      },
-      { arrayFilters: [{ 'element.user': user._id }], new: true },
-    );
+        { arrayFilters: [{ 'element.user': user._id }], new: true },
+      )
+      .populate('users.user');
   }
 }

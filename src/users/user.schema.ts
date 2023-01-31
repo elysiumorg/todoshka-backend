@@ -1,14 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude } from 'class-transformer';
-import { Transform } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { Document } from 'mongoose';
+import { Project } from 'src/projects/project.schema';
 import { Role } from '../auth/enums/role.enum';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({
+  toJSON: {
+    virtuals: true,
+  },
+})
 export class User {
-  @Transform(({ obj }) => obj._id.toString())
+  id: string;
+  @Exclude()
   _id: string;
   @Exclude()
   __v: number;
@@ -25,6 +30,24 @@ export class User {
   roles: Array<Role>;
   @Prop({ default: Date.now() })
   createdDate: Date;
+  @Type(() => Project)
+  projects: Project[];
+  fullname: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('fullname')
+  .get(function (this: UserDocument) {
+    return `${this.firstname} ${this.lastname}`;
+  })
+  .set(function (this: UserDocument, fullname: string) {
+    const [firstname, lastname] = fullname.split(' ');
+    this.set({ firstname, lastname });
+  });
+
+UserSchema.virtual('projects', {
+  ref: 'Project',
+  localField: '_id',
+  foreignField: 'users.user',
+});
