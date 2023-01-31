@@ -9,16 +9,23 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators/core/use-interceptors.decorator';
+import { RefType } from 'mongoose';
+import { NullInterceptor } from 'src/shared/interceptors/null-interceptor';
 import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
 import MongooseClassSerializerInterceptor from 'src/shared/utils/mongoSerializeInterceptor';
-import { AddUserDto } from './dto/add-user.dto';
+import { UserByIdPipe } from 'src/users/pipes/user-by-id.pipe';
+import { UserDocument } from 'src/users/user.schema';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import { Rights } from './enums/rights.enum';
+import { ParseRightsPipe } from './pipes/parse-rights.pipe';
 import { ProjectByIdPipe } from './pipes/project-by-id.pipe';
 import { Project, ProjectDocument } from './project.schema';
 import { ProjectsService } from './projects.service';
 
-@UseInterceptors(MongooseClassSerializerInterceptor(Project))
+@UseInterceptors(
+  new NullInterceptor('Project'),
+  MongooseClassSerializerInterceptor(Project),
+)
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
@@ -38,23 +45,29 @@ export class ProjectsController {
     return project;
   }
 
-  @Post(':id/users')
-  addUser(
-    @Param('id', ProjectByIdPipe) project: ProjectDocument,
-    @Body(ValidationPipe) data: AddUserDto,
+  @Patch(':id/users')
+  updateUserRights(
+    @Param('id', ParseObjectIdPipe) id: RefType,
+    @Body('userId', UserByIdPipe) user: UserDocument,
+    @Body('rights', ParseRightsPipe) rights: Rights[] = [],
   ) {
-    return this.projectsService.updateUserRights(
-      project,
-      data.userId,
-      data.rights,
-    );
+    return this.projectsService.updateUserRights(id, user, rights);
+  }
+
+  @Post(':id/users')
+  addUserToProject(
+    @Param('id', ProjectByIdPipe) project: ProjectDocument,
+    @Body('userId', UserByIdPipe) user: UserDocument,
+    @Body('rights', ParseRightsPipe) rights: Rights[] = [],
+  ) {
+    return this.projectsService.addUserToProject(project, user, rights);
   }
 
   @Delete(':id/users')
   removeUser(
-    @Param('id', ProjectByIdPipe) project: ProjectDocument,
-    @Body('userId', ParseObjectIdPipe) user: string,
+    @Param('id', ParseObjectIdPipe) id: RefType,
+    @Body('userId', UserByIdPipe) user: UserDocument,
   ) {
-    return this.projectsService.removeUserFromProject(project, user);
+    return this.projectsService.removeUserFromProject(id, user);
   }
 }

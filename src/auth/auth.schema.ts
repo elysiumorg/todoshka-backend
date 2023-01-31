@@ -1,13 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude, Transform, Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import mongoose, { Document } from 'mongoose';
 import { User } from 'src/users/user.schema';
 
 export type AuthDocument = Auth & Document;
 
-@Schema()
+@Schema({
+  toJSON: {
+    virtuals: true,
+  },
+})
 export class Auth {
-  @Transform(({ obj }) => obj._id.toString())
+  @Exclude()
   _id: string;
   @Exclude()
   __v: number;
