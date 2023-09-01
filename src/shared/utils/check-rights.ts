@@ -1,7 +1,7 @@
-import { Role } from 'src/auth/enums/role.enum';
-import { UserDocument } from 'src/users/user.schema';
-import { Rights } from '../enums/rights.enum';
-import { UserRights } from '../schemas/user-rights.schema';
+import { Role } from '~modules/auth/enums/role.enum';
+import { UserDocument } from '~modules/users/user.schema';
+import { Rights } from '~shared/enums/rights.enum';
+import { UserRights } from '~shared/schemas/user-rights.schema';
 
 export function checkRights(
   document: UserRights[],
