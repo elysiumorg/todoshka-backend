@@ -1,7 +1,7 @@
+import { ParseObjectIdPipe } from '~shared/pipes/objectid.pipe';
+
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common/exceptions';
-
-import { ParseObjectIdPipe } from '~shared/pipes/objectid.pipe';
 
 import { UsersService } from '../users.service';
 

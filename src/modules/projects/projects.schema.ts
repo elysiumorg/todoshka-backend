@@ -1,12 +1,12 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Transform, Type } from 'class-transformer';
 import { Document, ObjectId } from 'mongoose';
-
 import { Section } from '~modules/sections/section.schema';
 import {
   UserRights,
   UserRightsSchema,
 } from '~shared/schemas/user-rights.schema';
+
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type ProjectDocument = Project & Document;
 

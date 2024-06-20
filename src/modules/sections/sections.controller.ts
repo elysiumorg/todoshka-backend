@@ -3,7 +3,7 @@ import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
 import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
 import { RolesGuard } from '~modules/auth/guards/roles.guard';
 import { ProjectByIdPipe } from '~modules/projects/pipes/project-by-id.pipe';
-import { ProjectDocument } from '~modules/projects/project.schema';
+import { ProjectDocument } from '~modules/projects/projects.schema';
 import { UserDocument } from '~modules/users/user.schema';
 import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
 
@@ -18,10 +18,11 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common/decorators';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { CreateSectionDto } from './dto/create-section.dto';
-import { Section } from './section.schema';
+import { SectionByIdPipe } from './pipes/section-by-id.pipe';
+import { Section, SectionDocument } from './section.schema';
 import { SectionsService } from './sections.service';
 
 @UseInterceptors(MongooseClassSerializerInterceptor(Section))
@@ -37,24 +38,24 @@ export class SectionsController {
     @CurrentUser() currentUser: UserDocument,
     @Body(ValidationPipe)
     createSectionDto: CreateSectionDto,
-    @Body('project', ProjectByIdPipe)
+    @Body('projectId', ProjectByIdPipe)
     project: ProjectDocument,
   ) {
     return this.sectionService.create(createSectionDto, project, currentUser);
   }
 
-  @Get()
-  findAll() {
-    return this.sectionService.findAll();
-  }
-
+  @ApiParam({ name: 'id' })
   @Get(':id')
   findOne(@Param('id') id: RefType, @CurrentUser() user: UserDocument) {
     return this.sectionService.findOne(id, user);
   }
 
+  @ApiParam({ name: 'id' })
   @Delete(':id')
-  remove(@Param('id') id: RefType) {
-    return this.sectionService.remove(id);
+  remove(
+    @Param('id', SectionByIdPipe) section: SectionDocument,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.sectionService.remove(section, user);
   }
 }

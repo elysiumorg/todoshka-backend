@@ -1,3 +1,9 @@
+import { Model, RefType } from 'mongoose';
+import { Rights } from 'src/shared/enums/rights.enum';
+import { checkRights } from 'src/shared/utils/check-rights';
+import { UserDocument } from '~modules/users/user.schema';
+import { UsersService } from '~modules/users/users.service';
+
 import { Injectable } from '@nestjs/common';
 import {
   BadRequestException,
@@ -5,15 +11,9 @@ import {
   NotFoundException,
 } from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, RefType } from 'mongoose';
 
-import { UserDocument } from '~modules/users/user.schema';
-import { UsersService } from '~modules/users/users.service';
-import { Rights } from 'src/shared/enums/rights.enum';
-import { checkRights } from 'src/shared/utils/check-rights';
 import { CreateProjectDto } from './dto/create-project.dto';
-
-import { Project, ProjectDocument } from './project.schema';
+import { Project, ProjectDocument } from './projects.schema';
 
 @Injectable()
 export class ProjectsService {

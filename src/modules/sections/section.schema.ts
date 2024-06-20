@@ -1,8 +1,8 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import mongoose, { Document, isObjectIdOrHexString } from 'mongoose';
+import { Project } from '~modules/projects/projects.schema';
 
-import { Project } from '~modules/projects/project.schema';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type SectionDocument = Section & Document;
 

@@ -1,5 +1,6 @@
-import { PipeTransform, Injectable, NotFoundException } from '@nestjs/common';
 import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
+
+import { Injectable, NotFoundException, PipeTransform } from '@nestjs/common';
 
 import { ProjectsService } from '../projects.service';
 
@@ -8,7 +9,6 @@ export class ProjectByIdPipe implements PipeTransform<string> {
   constructor(private readonly projectService: ProjectsService) {}
 
   async transform(value: string) {
-    console.log(value);
     ParseObjectIdPipe.validate(value);
     const project = await this.projectService
       .findById(value)

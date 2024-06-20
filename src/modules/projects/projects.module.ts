@@ -1,10 +1,10 @@
+import { UsersModule } from '~modules/users/users.module';
+
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UsersModule } from '~modules/users/users.module';
-
-import { Project, ProjectSchema } from './project.schema';
 import { ProjectsController } from './projects.controller';
+import { Project, ProjectSchema } from './projects.schema';
 import { ProjectsService } from './projects.service';
 
 @Module({

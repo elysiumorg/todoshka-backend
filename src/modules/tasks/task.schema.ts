@@ -1,9 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import mongoose, { Document } from 'mongoose';
-
-import { Project } from '~modules/projects/project.schema';
+import { Project } from '~modules/projects/projects.schema';
 import { User } from '~modules/users/user.schema';
+
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type TaskDocument = Task & Document;
 

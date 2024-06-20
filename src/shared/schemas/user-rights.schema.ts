@@ -1,9 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
-import mongoose, { ObjectId, isObjectIdOrHexString } from 'mongoose';
-
+import mongoose, { isObjectIdOrHexString, ObjectId } from 'mongoose';
 import { User } from '~modules/users/user.schema';
 import { Rights } from '~shared/enums/rights.enum';
+
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({
   toJSON: {

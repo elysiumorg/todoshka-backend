@@ -1,3 +1,13 @@
+import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
+import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
+import { RolesGuard } from '~modules/auth/guards/roles.guard';
+import { UserByIdPipe } from '~modules/users/pipes/user-by-id.pipe';
+import { UserDocument } from '~modules/users/user.schema';
+import { Rights } from '~shared/enums/rights.enum';
+import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
+import { NullInterceptor } from '~shared/interceptors/null-interceptor';
+import { checkRights } from '~shared/utils/check-rights';
+
 import {
   Body,
   Controller,
@@ -11,24 +21,14 @@ import {
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators/core/use-interceptors.decorator';
 import { ForbiddenException } from '@nestjs/common/exceptions';
-
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
-import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
-import { RolesGuard } from '~modules/auth/guards/roles.guard';
-import { UserByIdPipe } from '~modules/users/pipes/user-by-id.pipe';
-import { UserDocument } from '~modules/users/user.schema';
-import { Rights } from '~shared/enums/rights.enum';
-import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
-import { NullInterceptor } from '~shared/interceptors/null-interceptor';
-import { checkRights } from '~shared/utils/check-rights';
 
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectUserDto } from './dto/update-project.dto';
 import { ParseRightsPipe } from './pipes/parse-rights.pipe';
 import { ProjectByIdPipe } from './pipes/project-by-id.pipe';
-import { Project, ProjectDocument } from './project.schema';
+import { Project, ProjectDocument } from './projects.schema';
 import { ProjectsService } from './projects.service';
-import { UpdateProjectUserDto } from './dto/update-project.dto';
 
 @UseInterceptors(
   new NullInterceptor('Project'),

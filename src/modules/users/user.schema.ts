@@ -1,7 +1,7 @@
 import { Exclude, Type } from 'class-transformer';
 import { Document } from 'mongoose';
 import { Role } from '~modules/auth/enums/role.enum';
-import { Project } from '~modules/projects/project.schema';
+import { Project } from '~modules/projects/projects.schema';
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 

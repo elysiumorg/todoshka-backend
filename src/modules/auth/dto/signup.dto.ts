@@ -1,13 +1,13 @@
-import { IsAlpha, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsAlphanumeric, IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class SignupDto {
-  @IsAlpha()
+  @IsString()
   firstname: string;
-  @IsAlpha()
+  @IsString()
   lastname: string;
   @IsEmail()
   email: string;
-  @IsAlpha()
+  @IsAlphanumeric()
   login: string;
   @IsNotEmpty()
   password: string;
