@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsHexadecimal, IsString } from 'class-validator';
 
 export class CreateSectionDto {
   @IsString()

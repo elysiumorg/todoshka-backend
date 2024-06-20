@@ -1,3 +1,5 @@
+import { Response } from 'express';
+
 import {
   Body,
   Controller,
@@ -5,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -25,15 +28,41 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('/signup')
   @ApiBearerAuth('Authorization')
-  signUp(@Body(ValidationPipe) user: SignupDto) {
-    return this.authService.signUp(user);
+  async signUp(@Res() res: Response, @Body(ValidationPipe) user: SignupDto) {
+    const tokens = await this.authService.signUp(user);
+
+    res.cookie('rt', tokens.refreshToken, {
+      expires: new Date(Date.now() + 1296000000),
+      httpOnly: true,
+      secure: true,
+    });
+    res.cookie('at', tokens.accessToken, {
+      expires: new Date(Date.now() + 900000),
+      httpOnly: true,
+      secure: true,
+    });
+
+    res.send(tokens);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('/signin')
   @ApiBearerAuth('Authorization')
-  signIn(@Body(ValidationPipe) user: SigninDto) {
-    return this.authService.signIn(user);
+  async signIn(@Res() res: Response, @Body(ValidationPipe) user: SigninDto) {
+    const tokens = await this.authService.signIn(user);
+
+    res.cookie('rt', tokens.refreshToken, {
+      expires: new Date(Date.now() + 1296000000),
+      httpOnly: true,
+      secure: true,
+    });
+    res.cookie('at', tokens.accessToken, {
+      expires: new Date(Date.now() + 900000),
+      httpOnly: true,
+      secure: true,
+    });
+
+    res.send(tokens);
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -44,7 +73,26 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Get('/refresh')
-  refreshTokens(@CurrentUser() payload: JwtRefreshPayload) {
-    return this.authService.refreshTokens(payload._id, payload.refreshToken);
+  async refreshTokens(
+    @Res() res: Response,
+    @CurrentUser() payload: JwtRefreshPayload,
+  ) {
+    const tokens = await this.authService.refreshTokens(
+      payload._id,
+      payload.refreshToken,
+    );
+
+    res.cookie('rt', tokens.refreshToken, {
+      expires: new Date(Date.now() + 1296000000),
+      httpOnly: true,
+      secure: true,
+    });
+    res.cookie('at', tokens.accessToken, {
+      expires: new Date(Date.now() + 900000),
+      httpOnly: true,
+      secure: true,
+    });
+
+    res.send();
   }
 }

@@ -1,3 +1,12 @@
+import { RefType } from 'mongoose';
+import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
+import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
+import { RolesGuard } from '~modules/auth/guards/roles.guard';
+import { ProjectByIdPipe } from '~modules/projects/pipes/project-by-id.pipe';
+import { ProjectDocument } from '~modules/projects/project.schema';
+import { UserDocument } from '~modules/users/user.schema';
+import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
+
 import {
   Body,
   Controller,
@@ -10,15 +19,6 @@ import {
 } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common/decorators';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RefType } from 'mongoose';
-
-import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
-import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
-import { RolesGuard } from '~modules/auth/guards/roles.guard';
-import { ProjectByIdPipe } from '~modules/projects/pipes/project-by-id.pipe';
-import { ProjectDocument } from '~modules/projects/project.schema';
-import { UserDocument } from '~modules/users/user.schema';
-import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
 
 import { CreateSectionDto } from './dto/create-section.dto';
 import { Section } from './section.schema';
@@ -37,8 +37,6 @@ export class SectionsController {
     @CurrentUser() currentUser: UserDocument,
     @Body(ValidationPipe)
     createSectionDto: CreateSectionDto,
-    @Body('title')
-    title: string,
     @Body('project', ProjectByIdPipe)
     project: ProjectDocument,
   ) {

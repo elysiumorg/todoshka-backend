@@ -1,3 +1,13 @@
+import { RefType } from 'mongoose';
+import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
+import { Roles } from '~modules/auth/decorators/roles.decorator';
+import { Role } from '~modules/auth/enums/role.enum';
+import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
+import { RolesGuard } from '~modules/auth/guards/roles.guard';
+import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
+import { NullInterceptor } from '~shared/interceptors/null-interceptor';
+import { ParseObjectIdPipe } from '~shared/pipes/objectid.pipe';
+
 import {
   Body,
   Controller,
@@ -9,17 +19,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators';
-import { RefType } from 'mongoose';
-
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
-import { Roles } from '~modules/auth/decorators/roles.decorator';
-import { Role } from '~modules/auth/enums/role.enum';
-import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
-import { RolesGuard } from '~modules/auth/guards/roles.guard';
-import MongooseClassSerializerInterceptor from '~shared/interceptors/mongoSerializeInterceptor';
-import { NullInterceptor } from '~shared/interceptors/null-interceptor';
-import { ParseObjectIdPipe } from '~shared/pipes/objectid.pipe';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserByIdPipe } from './pipes/user-by-id.pipe';

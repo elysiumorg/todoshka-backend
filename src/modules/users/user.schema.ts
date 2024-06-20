@@ -1,9 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import { Document } from 'mongoose';
-
 import { Role } from '~modules/auth/enums/role.enum';
 import { Project } from '~modules/projects/project.schema';
+
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type UserDocument = User & Document;
 
@@ -24,6 +24,8 @@ export class User {
   lastname: string;
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
+  @Prop({ required: true, unique: true, lowercase: true })
+  login: string;
   @Exclude()
   @Prop({ required: true })
   password: string;
