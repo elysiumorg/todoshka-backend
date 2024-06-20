@@ -12,6 +12,7 @@ import {
 import { UseInterceptors } from '@nestjs/common/decorators/core/use-interceptors.decorator';
 import { ForbiddenException } from '@nestjs/common/exceptions';
 
+import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
 import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
 import { RolesGuard } from '~modules/auth/guards/roles.guard';
@@ -27,6 +28,7 @@ import { ParseRightsPipe } from './pipes/parse-rights.pipe';
 import { ProjectByIdPipe } from './pipes/project-by-id.pipe';
 import { Project, ProjectDocument } from './project.schema';
 import { ProjectsService } from './projects.service';
+import { UpdateProjectUserDto } from './dto/update-project.dto';
 
 @UseInterceptors(
   new NullInterceptor('Project'),
@@ -34,6 +36,8 @@ import { ProjectsService } from './projects.service';
 )
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Controller('projects')
+@ApiTags('projects')
+@ApiBearerAuth('Authorization')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
@@ -51,6 +55,7 @@ export class ProjectsController {
     return this.projectsService.getUserProjects(user);
   }
 
+  @ApiParam({ name: 'id' })
   @Get(':id')
   findOne(
     @Param('id', ProjectByIdPipe) project: ProjectDocument,
@@ -62,6 +67,10 @@ export class ProjectsController {
     return project;
   }
 
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
   @Patch(':id/users')
   updateUserRights(
     @Param('id', ProjectByIdPipe) project: ProjectDocument,
@@ -77,6 +86,10 @@ export class ProjectsController {
     );
   }
 
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
   @Post(':id/users')
   addUserToProject(
     @Param('id', ProjectByIdPipe) project: ProjectDocument,
@@ -92,6 +105,10 @@ export class ProjectsController {
     );
   }
 
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
   @Delete(':id/users')
   removeUserFromProject(
     @Param('id', ProjectByIdPipe) id: ProjectDocument,
@@ -101,6 +118,10 @@ export class ProjectsController {
     return this.projectsService.removeUserFromProject(id, user, currentUser);
   }
 
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
   @Delete(':id')
   deleteProject(
     @Param('id', ProjectByIdPipe) project: ProjectDocument,

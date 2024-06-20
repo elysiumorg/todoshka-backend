@@ -1,16 +1,15 @@
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-  BadRequestException,
-} from '@nestjs/common';
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import { isHexadecimal } from 'class-validator';
 
 @Injectable()
 export class ParseObjectIdPipe implements PipeTransform {
-  transform(value: Primitive, _: ArgumentMetadata) {
+  static validate(value: Primitive) {
     if (!isHexadecimal(value) || value.toString().length !== 24)
       throw new BadRequestException('Not valid ObjectID');
+  }
+
+  transform(value: Primitive) {
+    ParseObjectIdPipe.validate(value);
     return value;
   }
 }

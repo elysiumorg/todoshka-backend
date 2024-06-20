@@ -7,12 +7,15 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
+@ApiTags('tasks')
+@ApiBearerAuth('Authorization')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 

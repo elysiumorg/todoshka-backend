@@ -11,6 +11,7 @@ import {
 import { UseInterceptors } from '@nestjs/common/decorators';
 import { RefType } from 'mongoose';
 
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
 import { Roles } from '~modules/auth/decorators/roles.decorator';
 import { Role } from '~modules/auth/enums/role.enum';
@@ -31,6 +32,8 @@ import { UsersService } from './users.service';
 )
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Controller('users')
+@ApiTags('users')
+@ApiBearerAuth('Authorization')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -39,7 +42,6 @@ export class UsersController {
   findAll() {
     return this.usersService.findAll();
   }
-
   @Get('/me')
   getMe(@CurrentUser() user: User) {
     return user;

@@ -39,7 +39,7 @@ export class ProjectsService {
     return this.projectModel.findById(id).populate({ path: 'users.user' });
   }
 
-  addUserToProject(
+  async addUserToProject(
     project: ProjectDocument,
     user: UserDocument,
     rights: Rights[],
@@ -53,9 +53,9 @@ export class ProjectsService {
       throw new ForbiddenException('You have no rights');
     }
 
-    return this.projectModel
-      .findOneAndUpdate(
-        { id: project.id, 'users.user': { $not: { $eq: user } } },
+    const a = await this.projectModel
+      .findByIdAndUpdate(
+        project.id,
         {
           $push: {
             users: { user: user.id, rights },
@@ -64,6 +64,10 @@ export class ProjectsService {
         { new: true, runValidators: true },
       )
       .populate('users.user');
+
+    console.log(a);
+
+    return a;
   }
 
   removeUserFromProject(

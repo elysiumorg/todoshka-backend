@@ -9,6 +9,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common/decorators';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RefType } from 'mongoose';
 
 import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
@@ -26,13 +27,18 @@ import { SectionsService } from './sections.service';
 @UseInterceptors(MongooseClassSerializerInterceptor(Section))
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Controller('sections')
+@ApiTags('section')
+@ApiBearerAuth('Authorization')
 export class SectionsController {
   constructor(private readonly sectionService: SectionsService) {}
 
   @Post()
   create(
     @CurrentUser() currentUser: UserDocument,
-    @Body(ValidationPipe) createSectionDto: CreateSectionDto,
+    @Body(ValidationPipe)
+    createSectionDto: CreateSectionDto,
+    @Body('title')
+    title: string,
     @Body('project', ProjectByIdPipe)
     project: ProjectDocument,
   ) {
