@@ -19,7 +19,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserByIdPipe } from './pipes/user-by-id.pipe';
@@ -50,6 +50,7 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Get(':id')
+  @ApiParam({ name: 'id' })
   findById(@Param('id', UserByIdPipe) user: UserDocument) {
     return user;
   }

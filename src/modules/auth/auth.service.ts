@@ -67,11 +67,13 @@ export class AuthService {
   }
 
   async signIn(data: SigninDto) {
-    if (!data.email || !data.login)
+    if (!data.email && !data.login)
       throw new BadRequestException('Email or login is required');
 
-    const userFromEmail = await this.usersService.findByEmail(data.email);
-    const userFromLogin = await this.usersService.findByLogin(data.login);
+    const userFromEmail =
+      data.email && (await this.usersService.findByEmail(data.email));
+    const userFromLogin =
+      data.login && (await this.usersService.findByLogin(data.login));
     const user = userFromEmail || userFromLogin;
     if (!user) throw new BadRequestException('User does not exist');
 
