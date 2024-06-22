@@ -3,7 +3,7 @@ import { Response } from 'express';
 import {
   Body,
   Controller,
-  Get,
+  Delete,
   HttpCode,
   HttpStatus,
   Post,
@@ -11,12 +11,18 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { TokensDto } from './dto/tokens.dto';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { JwtRefreshPayload } from './strategies/refresh-token.strategy';
 
@@ -25,9 +31,10 @@ import { JwtRefreshPayload } from './strategies/refresh-token.strategy';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(HttpStatus.CREATED)
   @Post('/signup')
+  @HttpCode(HttpStatus.CREATED)
   @ApiBearerAuth('Authorization')
+  @ApiCreatedResponse({ type: TokensDto })
   async signUp(@Res() res: Response, @Body(ValidationPipe) user: SignupDto) {
     const tokens = await this.authService.signUp(user);
 
@@ -48,6 +55,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('/signin')
   @ApiBearerAuth('Authorization')
+  @ApiOkResponse({ type: TokensDto })
   async signIn(@Res() res: Response, @Body(ValidationPipe) user: SigninDto) {
     const tokens = await this.authService.signIn(user);
 
@@ -66,13 +74,23 @@ export class AuthController {
   }
 
   @UseGuards(RefreshTokenGuard)
-  @Get('/logout')
+  @Delete('/logout')
+  @ApiOkResponse({
+    schema: {
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+      },
+    },
+  })
   logout(@CurrentUser() payload: JwtRefreshPayload) {
     return this.authService.logout(payload._id, payload.refreshToken);
   }
 
   @UseGuards(RefreshTokenGuard)
-  @Get('/refresh')
+  @Post('/refresh')
+  @ApiOkResponse({ type: TokensDto })
   async refreshTokens(
     @Res() res: Response,
     @CurrentUser() payload: JwtRefreshPayload,
@@ -93,6 +111,6 @@ export class AuthController {
       secure: true,
     });
 
-    res.send();
+    res.send(tokens);
   }
 }

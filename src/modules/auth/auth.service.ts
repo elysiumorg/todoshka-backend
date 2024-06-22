@@ -1,8 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { TransporterService } from '~modules/transporter/transporter.service';
-import { UsersService } from '~modules/users/users.service';
 
 import {
   BadRequestException,
@@ -13,11 +11,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 
+import { TransporterService } from '~modules/transporter/transporter.service';
+import { UsersService } from '~modules/users/users.service';
+
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Auth, AuthDocument } from './auth.schema';
 import { SigninDto } from './dto/signin.dto';
 import { Role } from './enums/role.enum';
-
-import { CreateUserDto } from '../users/dto/create-user.dto';
 
 type Payload = {
   _id: string;

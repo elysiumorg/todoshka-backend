@@ -1,10 +1,10 @@
-import { TransporterService } from '~modules/transporter/transporter.service';
-import { UsersModule } from '~modules/users/users.module';
-
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
+
+import { TransporterService } from '~modules/transporter/transporter.service';
+import { UsersModule } from '~modules/users/users.module';
 
 import { AuthController } from './auth.controller';
 import { Auth, AuthSchema } from './auth.schema';

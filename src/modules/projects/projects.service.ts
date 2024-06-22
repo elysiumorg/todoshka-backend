@@ -1,8 +1,4 @@
-import { Model, RefType } from 'mongoose';
-import { Rights } from 'src/shared/enums/rights.enum';
-import { checkRights } from 'src/shared/utils/check-rights';
-import { UserDocument } from '~modules/users/user.schema';
-import { UsersService } from '~modules/users/users.service';
+import mongoose, { Model, RefType } from 'mongoose';
 
 import { Injectable } from '@nestjs/common';
 import {
@@ -12,8 +8,13 @@ import {
 } from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
 
+import { UserDocument } from '~modules/users/user.schema';
+import { UsersService } from '~modules/users/users.service';
+import { Rights } from '~shared/enums/rights.enum';
+import { checkRights } from '~shared/utils/check-rights';
+
 import { CreateProjectDto } from './dto/create-project.dto';
-import { Project, ProjectDocument } from './projects.schema';
+import { Project, ProjectDocument } from './schemas/projects.schema';
 
 @Injectable()
 export class ProjectsService {
@@ -32,7 +33,7 @@ export class ProjectsService {
   getUserProjects(user: UserDocument) {
     return this.projectModel
       .find({ 'users.user': { $eq: user.id } })
-      .populate('users.user sections');
+      .populate('users.user');
   }
 
   findById(id: RefType) {
@@ -156,5 +157,86 @@ export class ProjectsService {
 
     await project.deleteOne();
     return project;
+  }
+
+  async createSection(
+    section: { title: string },
+    project: ProjectDocument,
+    currentUser: UserDocument,
+  ) {
+    const right = checkRights(project.users, currentUser, [
+      Rights.CREATE,
+      Rights.OWNER,
+    ]);
+
+    if (!right) {
+      throw new ForbiddenException('You have no rights');
+    }
+
+    return this.projectModel.findByIdAndUpdate(
+      project.id,
+      {
+        $push: {
+          sections: {
+            id: new mongoose.Types.ObjectId().toString(),
+            ...section,
+          },
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async removeSectionById(
+    sectionId: RefType,
+    project: ProjectDocument,
+    currentUser: UserDocument,
+  ) {
+    const right = checkRights(project.users, currentUser, [
+      Rights.CREATE,
+      Rights.OWNER,
+    ]);
+
+    if (!right) {
+      throw new ForbiddenException('You have no rights');
+    }
+
+    return this.projectModel.findByIdAndUpdate(
+      project.id,
+      {
+        $pull: {
+          sections: { id: sectionId },
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async addTaskToSectionById(
+    project: ProjectDocument,
+    sectionId: RefType,
+    task: { title: string },
+    currentUser: UserDocument,
+  ) {
+    const right = checkRights(project.users, currentUser, [
+      Rights.CREATE,
+      Rights.OWNER,
+    ]);
+
+    if (!right) {
+      throw new ForbiddenException('You have no rights');
+    }
+
+    return this.projectModel
+      .findByIdAndUpdate(
+        project.id,
+        {
+          $push: {
+            'sections.$[element].tasks': task,
+          },
+        },
+        { arrayFilters: [{ 'element.id': sectionId }], new: true },
+      )
+      .populate('users.user');
   }
 }

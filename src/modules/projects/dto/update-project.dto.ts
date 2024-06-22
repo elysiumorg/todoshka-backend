@@ -1,7 +1,8 @@
 import { IsArray, IsEnum, IsHexadecimal, Length } from 'class-validator';
-import { Rights } from '~src/shared/enums/rights.enum';
 
-import { PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+
+import { Rights } from '~shared/enums/rights.enum';
 
 import { CreateProjectDto } from './create-project.dto';
 
@@ -13,5 +14,6 @@ export class UpdateProjectUserDto {
   userId: string;
   @IsArray()
   @IsEnum(Rights)
+  @ApiProperty({ type: () => [Rights], enumName: 'Rights', enum: Rights })
   rights: Rights[];
 }

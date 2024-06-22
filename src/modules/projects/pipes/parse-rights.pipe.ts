@@ -1,6 +1,6 @@
-import { Rights } from '~shared/enums/rights.enum';
-
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+
+import { Rights } from '~shared/enums/rights.enum';
 
 @Injectable()
 export class ParseRightsPipe implements PipeTransform<Rights[]> {

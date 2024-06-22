@@ -1,6 +1,6 @@
-import { ParseObjectIdPipe } from 'src/shared/pipes/objectid.pipe';
-
 import { Injectable, NotFoundException, PipeTransform } from '@nestjs/common';
+
+import { ParseObjectIdPipe } from '~shared/pipes/objectid.pipe';
 
 import { ProjectsService } from '../projects.service';
 
@@ -12,7 +12,7 @@ export class ProjectByIdPipe implements PipeTransform<string> {
     ParseObjectIdPipe.validate(value);
     const project = await this.projectService
       .findById(value)
-      .populate('users.user sections');
+      .populate('users.user');
 
     if (!project) {
       throw new NotFoundException('Project not found');

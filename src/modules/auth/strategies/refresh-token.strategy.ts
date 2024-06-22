@@ -29,8 +29,11 @@ export class RefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  validate(req: Request, payload: JwtRefreshPayload) {
-    const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
+  validate(req: Request, payload: Omit<JwtRefreshPayload, 'refreshToken'>) {
+    let refreshToken = req.get('Authorization') || req.cookies['rt'];
+
+    refreshToken = refreshToken.replace('Bearer', '').trim();
+
     return { ...payload, refreshToken };
   }
 }
