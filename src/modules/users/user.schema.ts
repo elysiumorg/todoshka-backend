@@ -1,9 +1,10 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude, Type } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { Document } from 'mongoose';
 
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+
 import { Role } from '~modules/auth/enums/role.enum';
-import { Project } from '~modules/projects/project.schema';
 
 export type UserDocument = User & Document;
 
@@ -13,26 +14,34 @@ export type UserDocument = User & Document;
   },
 })
 export class User {
+  @ApiProperty({ type: String })
   id: string;
   @Exclude()
   _id: string;
   @Exclude()
   __v: number;
+  @ApiProperty({ type: String })
   @Prop({ required: true, maxlength: 32 })
   firstname: string;
+  @ApiProperty({ type: String })
   @Prop({ required: true, maxlength: 32 })
   lastname: string;
+  @ApiProperty({ type: String })
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
+  @ApiProperty({ type: String })
+  @Prop({ required: true, unique: true, lowercase: true })
+  login: string;
   @Exclude()
   @Prop({ required: true })
   password: string;
+  @ApiProperty({ enumName: 'Role', enum: Role })
   @Prop({ required: true, default: [Role.USER] })
   roles: Array<Role>;
+  @ApiProperty({ type: String })
   @Prop({ default: Date.now() })
   createdDate: Date;
-  @Type(() => Project)
-  projects: Project[];
+  @ApiProperty({ type: String })
   fullname: string;
 }
 
@@ -46,9 +55,3 @@ UserSchema.virtual('fullname')
     const [firstname, lastname] = fullname.split(' ');
     this.set({ firstname, lastname });
   });
-
-UserSchema.virtual('projects', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'users.user',
-});

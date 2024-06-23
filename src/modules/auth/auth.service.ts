@@ -1,3 +1,7 @@
+import * as bcrypt from 'bcrypt';
+import { Model } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
   BadRequestException,
   ForbiddenException,
@@ -6,9 +10,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
-import { Model } from 'mongoose';
 
+import { TransporterService } from '~modules/transporter/transporter.service';
 import { UsersService } from '~modules/users/users.service';
 
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -29,21 +32,32 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private transporterService: TransporterService,
   ) {}
 
   async signUp(
     createUserDto: CreateUserDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const userExists = await this.usersService.findByEmail(createUserDto.email);
+
     if (userExists) {
       throw new BadRequestException('User already exists');
     }
+
+    const approveCode = uuidv4();
+
+    this.transporterService.sendMail({
+      to: createUserDto.email,
+      subject: 'Подтверждение учетной записи',
+      html: `<p>Чтобы подтвердить свою учетную запись, перейдите по ссылке: ${process.env.FRONTEND_URL}/approve/${approveCode}</p>`,
+    });
 
     const hash = await this.hashData(createUserDto.password);
     const newUser = await this.usersService.create({
       ...createUserDto,
       password: hash,
     });
+
     const payload = {
       _id: newUser._id,
       email: newUser.email,
@@ -53,16 +67,26 @@ export class AuthService {
   }
 
   async signIn(data: SigninDto) {
-    const user = await this.usersService.findByEmail(data.email);
+    if (!data.email && !data.login)
+      throw new BadRequestException('Email or login is required');
+
+    const userFromEmail =
+      data.email && (await this.usersService.findByEmail(data.email));
+    const userFromLogin =
+      data.login && (await this.usersService.findByLogin(data.login));
+    const user = userFromEmail || userFromLogin;
     if (!user) throw new BadRequestException('User does not exist');
+
     const passwordMatches = await bcrypt.compare(data.password, user.password);
     if (!passwordMatches)
       throw new BadRequestException('Password is incorrect');
+
     const payload: Payload = {
       _id: user._id,
       email: user.email,
       roles: user.roles,
     };
+
     return await this.updateRefreshToken(user._id, payload);
   }
 

@@ -1,3 +1,5 @@
+import { RefType } from 'mongoose';
+
 import {
   Body,
   Controller,
@@ -9,7 +11,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators';
-import { RefType } from 'mongoose';
+import {
+  ApiBearerAuth,
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
 import { Roles } from '~modules/auth/decorators/roles.decorator';
@@ -31,28 +39,36 @@ import { UsersService } from './users.service';
 )
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Controller('users')
+@ApiTags('users')
+@ApiBearerAuth('Authorization')
+@ApiExtraModels(User)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Roles(Role.ADMIN)
   @Get()
+  @Roles(Role.ADMIN)
+  @ApiOkResponse({ type: [User] })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get('/me')
+  @ApiOkResponse({ type: User })
   getMe(@CurrentUser() user: User) {
     return user;
   }
 
+  @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  @Get(':id')
+  @ApiParam({ name: 'id' })
+  @ApiOkResponse({ type: User })
   findById(@Param('id', UserByIdPipe) user: UserDocument) {
     return user;
   }
 
   @Patch('/me')
+  @ApiOkResponse({ type: User })
   updateMe(
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
     @CurrentUser() id: RefType,
@@ -60,9 +76,11 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  @Patch(':id')
+  @ApiParam({ name: 'id' })
+  @ApiOkResponse({ type: User })
   update(
     @Param('id', UserByIdPipe) id: RefType,
     @Body() updateUserDto: UpdateUserDto,
@@ -70,9 +88,11 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  @Delete(':id')
+  @ApiParam({ name: 'id' })
+  @ApiOkResponse({ type: User })
   remove(@Param('id', ParseObjectIdPipe) id: RefType) {
     return this.usersService.remove(id);
   }

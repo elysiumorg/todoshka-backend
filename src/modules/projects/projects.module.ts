@@ -3,9 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UsersModule } from '~modules/users/users.module';
 
-import { Project, ProjectSchema } from './project.schema';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
+import { Project, ProjectSchema } from './schemas/projects.schema';
 
 @Module({
   imports: [

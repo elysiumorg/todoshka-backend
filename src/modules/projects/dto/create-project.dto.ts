@@ -1,6 +1,7 @@
-import { IsAlphanumeric } from 'class-validator';
+import { IsString, MaxLength } from 'class-validator';
 
 export class CreateProjectDto {
-  @IsAlphanumeric()
+  @IsString()
+  @MaxLength(100)
   title: string;
 }

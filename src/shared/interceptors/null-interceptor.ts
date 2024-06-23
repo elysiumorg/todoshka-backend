@@ -1,3 +1,6 @@
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 import {
   CallHandler,
   ExecutionContext,
@@ -5,8 +8,6 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common/exceptions';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Injectable()
 export class NullInterceptor implements NestInterceptor {

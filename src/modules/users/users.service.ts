@@ -1,6 +1,7 @@
+import { Model, RefType } from 'mongoose';
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, RefType } from 'mongoose';
 
 import { User, UserDocument } from '~modules/users/user.schema';
 
@@ -16,30 +17,19 @@ export class UsersService {
   }
 
   async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().populate({
-      path: 'projects',
-      populate: {
-        path: 'users.user',
-      },
-    });
+    return this.userModel.find();
   }
 
   async findById(id: RefType): Promise<UserDocument> {
-    return await this.userModel.findById(id).populate({
-      path: 'projects',
-      populate: {
-        path: 'users.user',
-      },
-    });
+    return await this.userModel.findById(id);
   }
 
   async findByEmail(email: string): Promise<UserDocument> {
-    return this.userModel.findOne({ email }).populate({
-      path: 'projects',
-      populate: {
-        path: 'users.user',
-      },
-    });
+    return this.userModel.findOne({ email });
+  }
+
+  async findByLogin(login: string): Promise<UserDocument> {
+    return this.userModel.findOne({ login: login.toLowerCase() });
   }
 
   async update(id: RefType, update: UpdateUserDto): Promise<UserDocument> {

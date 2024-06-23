@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
+import { TransporterService } from '~modules/transporter/transporter.service';
 import { UsersModule } from '~modules/users/users.module';
 
 import { AuthController } from './auth.controller';
@@ -19,6 +20,11 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  providers: [
+    AuthService,
+    TransporterService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
+  ],
 })
 export class AuthModule {}

@@ -1,3 +1,5 @@
+import { RefType } from 'mongoose';
+
 import {
   Body,
   Controller,
@@ -11,6 +13,13 @@ import {
 } from '@nestjs/common';
 import { UseInterceptors } from '@nestjs/common/decorators/core/use-interceptors.decorator';
 import { ForbiddenException } from '@nestjs/common/exceptions';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { CurrentUser } from '~modules/auth/decorators/current-user.decorator';
 import { AccessTokenGuard } from '~modules/auth/guards/acces-token.guard';
@@ -23,10 +32,14 @@ import { NullInterceptor } from '~shared/interceptors/null-interceptor';
 import { checkRights } from '~shared/utils/check-rights';
 
 import { CreateProjectDto } from './dto/create-project.dto';
+import { CreateSectionDto } from './dto/create-section.dto';
+import { CreateTaskDto } from './dto/cteate-task.dto';
+import { UpdateProjectUserDto } from './dto/update-project.dto';
 import { ParseRightsPipe } from './pipes/parse-rights.pipe';
 import { ProjectByIdPipe } from './pipes/project-by-id.pipe';
-import { Project, ProjectDocument } from './project.schema';
 import { ProjectsService } from './projects.service';
+import { Project, ProjectDocument } from './schemas/projects.schema';
+import { Task } from './schemas/task.schema';
 
 @UseInterceptors(
   new NullInterceptor('Project'),
@@ -34,10 +47,13 @@ import { ProjectsService } from './projects.service';
 )
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Controller('projects')
+@ApiTags('projects')
+@ApiBearerAuth('Authorization')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
+  @ApiCreatedResponse({ type: () => Project })
   async create(
     @Body(ValidationPipe) createProjectDto: CreateProjectDto,
     @CurrentUser() user: UserDocument,
@@ -51,9 +67,10 @@ export class ProjectsController {
     return this.projectsService.getUserProjects(user);
   }
 
-  @Get(':id')
+  @ApiParam({ name: 'projectId' })
+  @Get(':projectId')
   findOne(
-    @Param('id', ProjectByIdPipe) project: ProjectDocument,
+    @Param('projectId', ProjectByIdPipe) project: ProjectDocument,
     @CurrentUser() currentUser: UserDocument,
   ) {
     if (!checkRights(project.users, currentUser)) {
@@ -62,9 +79,13 @@ export class ProjectsController {
     return project;
   }
 
-  @Patch(':id/users')
+  @ApiParam({ name: 'projectId' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
+  @Patch(':projectId/users')
   updateUserRights(
-    @Param('id', ProjectByIdPipe) project: ProjectDocument,
+    @Param('projectId', ProjectByIdPipe) project: ProjectDocument,
     @Body('userId', UserByIdPipe) user: UserDocument,
     @Body('rights', ParseRightsPipe) rights: Rights[] = [],
     @CurrentUser() currentUser: UserDocument,
@@ -77,9 +98,13 @@ export class ProjectsController {
     );
   }
 
-  @Post(':id/users')
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
+  @Post(':projectId/users')
   addUserToProject(
-    @Param('id', ProjectByIdPipe) project: ProjectDocument,
+    @Param('projectId', ProjectByIdPipe) project: ProjectDocument,
     @Body('userId', UserByIdPipe) user: UserDocument,
     @Body('rights', ParseRightsPipe) rights: Rights[] = [],
     @CurrentUser() currentUser: UserDocument,
@@ -92,20 +117,73 @@ export class ProjectsController {
     );
   }
 
-  @Delete(':id/users')
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
+  @Delete(':projectId/users')
   removeUserFromProject(
-    @Param('id', ProjectByIdPipe) id: ProjectDocument,
+    @Param('projectId', ProjectByIdPipe) id: ProjectDocument,
     @Body('userId', UserByIdPipe) user: UserDocument,
     @CurrentUser() currentUser: UserDocument,
   ) {
     return this.projectsService.removeUserFromProject(id, user, currentUser);
   }
 
-  @Delete(':id')
+  @ApiParam({ name: 'id' })
+  @ApiBody({
+    type: UpdateProjectUserDto,
+  })
+  @Delete(':projectId')
   deleteProject(
-    @Param('id', ProjectByIdPipe) project: ProjectDocument,
+    @Param('projectId', ProjectByIdPipe) project: ProjectDocument,
     @CurrentUser() currentUser: UserDocument,
   ) {
     return this.projectsService.deleteProject(project, currentUser);
+  }
+
+  @ApiParam({ name: 'projectId' })
+  @Post(':projectId/section')
+  createSection(
+    @CurrentUser() currentUser: UserDocument,
+    @Body(ValidationPipe)
+    createSectionDto: CreateSectionDto,
+    @Param('projectId', ProjectByIdPipe)
+    project: ProjectDocument,
+  ) {
+    return this.projectsService.createSection(
+      createSectionDto,
+      project,
+      currentUser,
+    );
+  }
+
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'sectionId' })
+  @Delete(':projectId/section/:sectionId')
+  removeSection(
+    @Param('projectId', ProjectByIdPipe) project,
+    @Param('sectionId') sectionId: RefType,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.projectsService.removeSectionById(sectionId, project, user);
+  }
+
+  @ApiCreatedResponse({ type: Task })
+  @ApiParam({ name: 'projectId' })
+  @ApiParam({ name: 'sectionId' })
+  @Post(':projectId/section/:sectionId/task')
+  addTask(
+    @Param('projectId', ProjectByIdPipe) project,
+    @Param('sectionId') sectionId: RefType,
+    @Body(ValidationPipe) createTaskDto: CreateTaskDto,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.projectsService.addTaskToSectionById(
+      project,
+      sectionId,
+      createTaskDto,
+      user,
+    );
   }
 }

@@ -1,3 +1,5 @@
+import mongoose, { Model, RefType } from 'mongoose';
+
 import { Injectable } from '@nestjs/common';
 import {
   BadRequestException,
@@ -5,21 +7,18 @@ import {
   NotFoundException,
 } from '@nestjs/common/exceptions';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, RefType } from 'mongoose';
 
 import { UserDocument } from '~modules/users/user.schema';
-import { UsersService } from '~modules/users/users.service';
-import { Rights } from 'src/shared/enums/rights.enum';
-import { checkRights } from 'src/shared/utils/check-rights';
-import { CreateProjectDto } from './dto/create-project.dto';
+import { Rights } from '~shared/enums/rights.enum';
+import { checkRights } from '~shared/utils/check-rights';
 
-import { Project, ProjectDocument } from './project.schema';
+import { CreateProjectDto } from './dto/create-project.dto';
+import { Project, ProjectDocument } from './schemas/projects.schema';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    private readonly userService: UsersService,
   ) {}
 
   create(createProjectDto: CreateProjectDto, user: UserDocument) {
@@ -32,14 +31,14 @@ export class ProjectsService {
   getUserProjects(user: UserDocument) {
     return this.projectModel
       .find({ 'users.user': { $eq: user.id } })
-      .populate('users.user sections');
+      .populate('users.user');
   }
 
   findById(id: RefType) {
     return this.projectModel.findById(id).populate({ path: 'users.user' });
   }
 
-  addUserToProject(
+  async addUserToProject(
     project: ProjectDocument,
     user: UserDocument,
     rights: Rights[],
@@ -53,9 +52,9 @@ export class ProjectsService {
       throw new ForbiddenException('You have no rights');
     }
 
-    return this.projectModel
-      .findOneAndUpdate(
-        { id: project.id, 'users.user': { $not: { $eq: user } } },
+    const a = await this.projectModel
+      .findByIdAndUpdate(
+        project.id,
         {
           $push: {
             users: { user: user.id, rights },
@@ -64,6 +63,10 @@ export class ProjectsService {
         { new: true, runValidators: true },
       )
       .populate('users.user');
+
+    console.log(a);
+
+    return a;
   }
 
   removeUserFromProject(
@@ -152,5 +155,86 @@ export class ProjectsService {
 
     await project.deleteOne();
     return project;
+  }
+
+  async createSection(
+    section: { title: string },
+    project: ProjectDocument,
+    currentUser: UserDocument,
+  ) {
+    const right = checkRights(project.users, currentUser, [
+      Rights.CREATE,
+      Rights.OWNER,
+    ]);
+
+    if (!right) {
+      throw new ForbiddenException('You have no rights');
+    }
+
+    return this.projectModel.findByIdAndUpdate(
+      project.id,
+      {
+        $push: {
+          sections: {
+            id: new mongoose.Types.ObjectId().toString(),
+            ...section,
+          },
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async removeSectionById(
+    sectionId: RefType,
+    project: ProjectDocument,
+    currentUser: UserDocument,
+  ) {
+    const right = checkRights(project.users, currentUser, [
+      Rights.CREATE,
+      Rights.OWNER,
+    ]);
+
+    if (!right) {
+      throw new ForbiddenException('You have no rights');
+    }
+
+    return this.projectModel.findByIdAndUpdate(
+      project.id,
+      {
+        $pull: {
+          sections: { id: sectionId },
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async addTaskToSectionById(
+    project: ProjectDocument,
+    sectionId: RefType,
+    task: { title: string },
+    currentUser: UserDocument,
+  ) {
+    const right = checkRights(project.users, currentUser, [
+      Rights.CREATE,
+      Rights.OWNER,
+    ]);
+
+    if (!right) {
+      throw new ForbiddenException('You have no rights');
+    }
+
+    return this.projectModel
+      .findByIdAndUpdate(
+        project.id,
+        {
+          $push: {
+            'sections.$[element].tasks': task,
+          },
+        },
+        { arrayFilters: [{ 'element.id': sectionId }], new: true },
+      )
+      .populate('users.user');
   }
 }

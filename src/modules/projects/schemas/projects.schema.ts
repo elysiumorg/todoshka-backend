@@ -1,12 +1,15 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude, Transform, Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { Document, ObjectId } from 'mongoose';
 
-import { Section } from '~modules/sections/section.schema';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+
 import {
   UserRights,
   UserRightsSchema,
 } from '~shared/schemas/user-rights.schema';
+
+import { Section, SectionSchema } from './section.schema';
 
 export type ProjectDocument = Project & Document;
 
@@ -18,35 +21,38 @@ export type ProjectDocument = Project & Document;
 export class Project {
   @Exclude()
   _id: ObjectId;
+
   @Exclude()
   __v: number;
+
+  @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: String })
   @Prop({ required: true })
   title: string;
+
+  @ApiProperty({ type: () => [UserRights] })
   @Type(() => UserRights)
   @Prop({
-    type: [UserRightsSchema],
+    type: () => [UserRightsSchema],
     default: [],
     select: true,
   })
   users: UserRights[];
+
+  @ApiProperty({ type: Date })
   @Prop({ default: Date.now() })
   createdDate: Date;
 
-  @Transform(({ value }) => {
-    value.map((sec) => {
-      delete sec.project;
-      return sec;
-    });
-    return value;
-  })
+  @ApiProperty({ type: () => [Section] })
   @Type(() => Section)
+  @Prop({
+    type: () => [SectionSchema],
+    default: [],
+    select: true,
+  })
   sections: Section[];
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
-
-ProjectSchema.virtual('sections', {
-  ref: 'Section',
-  localField: '_id',
-  foreignField: 'project',
-});
