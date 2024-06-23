@@ -26,6 +26,9 @@ export class Project {
   __v: number;
 
   @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: String })
   @Prop({ required: true })
   title: string;
 

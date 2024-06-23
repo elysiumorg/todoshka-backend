@@ -6,14 +6,10 @@ import { UsersModule } from '~modules/users/users.module';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
 import { Project, ProjectSchema } from './schemas/projects.schema';
-import { Section, SectionSchema } from './schemas/section.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Project.name, schema: ProjectSchema },
-      { name: Section.name, schema: SectionSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Project.name, schema: ProjectSchema }]),
     UsersModule,
   ],
   controllers: [ProjectsController],

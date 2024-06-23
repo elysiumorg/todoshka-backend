@@ -20,6 +20,9 @@ export class Task {
   __v: number;
 
   @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: String })
   @Prop({ type: String })
   title: string;
 }

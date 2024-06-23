@@ -14,22 +14,22 @@ export type UserDocument = User & Document;
   },
 })
 export class User {
-  @ApiProperty({ type: String, description: 'Id в формате ObjectId' })
+  @ApiProperty({ type: String })
   id: string;
   @Exclude()
   _id: string;
   @Exclude()
   __v: number;
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: String })
   @Prop({ required: true, maxlength: 32 })
   firstname: string;
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: String })
   @Prop({ required: true, maxlength: 32 })
   lastname: string;
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: String })
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: String })
   @Prop({ required: true, unique: true, lowercase: true })
   login: string;
   @Exclude()
@@ -38,10 +38,10 @@ export class User {
   @ApiProperty({ enumName: 'Role', enum: Role })
   @Prop({ required: true, default: [Role.USER] })
   roles: Array<Role>;
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: String })
   @Prop({ default: Date.now() })
   createdDate: Date;
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: String })
   fullname: string;
 }
 

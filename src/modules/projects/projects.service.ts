@@ -9,7 +9,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 
 import { UserDocument } from '~modules/users/user.schema';
-import { UsersService } from '~modules/users/users.service';
 import { Rights } from '~shared/enums/rights.enum';
 import { checkRights } from '~shared/utils/check-rights';
 
@@ -20,7 +19,6 @@ import { Project, ProjectDocument } from './schemas/projects.schema';
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    private readonly userService: UsersService,
   ) {}
 
   create(createProjectDto: CreateProjectDto, user: UserDocument) {

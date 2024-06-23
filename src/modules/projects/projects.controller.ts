@@ -53,7 +53,7 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  @ApiCreatedResponse({ type: Project })
+  @ApiCreatedResponse({ type: () => Project })
   async create(
     @Body(ValidationPipe) createProjectDto: CreateProjectDto,
     @CurrentUser() user: UserDocument,

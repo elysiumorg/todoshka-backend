@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Document, model } from 'mongoose';
+import { Document } from 'mongoose';
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
@@ -20,9 +20,11 @@ export class Section {
   __v: number;
 
   @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: String })
   @Prop({ type: String })
   title: string;
 }
 
 export const SectionSchema = SchemaFactory.createForClass(Section);
-export const SectionModel = model('Section', SectionSchema);
